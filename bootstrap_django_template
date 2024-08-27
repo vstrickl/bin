@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# Check for the correct number of arguments
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <project-name> <projectName>"
+    exit 1
+fi
+
+# Assign arguments to variables
+PROJECT_NAME=$1
+PROJECT_NAME_CAMEL=$2
+
+# Define the path for the generated script
+GENERATED_SCRIPT=~/bin/bootstrap_django.sh
+
+# Create the bootstrap_django.sh script
+cat <<EOF > $GENERATED_SCRIPT
+#!/bin/bash
+
+echo "Creating your Django Project Virtual Environment..."
+python3 -m venv ~/venv/$PROJECT_NAME
+
+echo "Creating your Django Project Directory..."
+mkdir -p ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/
+
+echo "Creating necessary project files ..."
+touch ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/Dockerfile
+touch ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/docker-compose.yml
+touch ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/.gitignore
+touch ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/.env
+
+echo "Adding content to your Docker files..."
+echo "Working on the Dockerfile..."
+cat <<EOD > ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/Dockerfile
+### This file defines the application's image content ###
+
+FROM python:3
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Setup working directory
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
+
+# Copy project
+COPY . /app/
+
+# Set the DJANGO_SETTINGS_MODULE environment variable
+ENV DJANGO_SETTINGS_MODULE=$PROJECT_NAME_CAMEL.settings
+
+# Start the Django server
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi:application"]
+EOD
+
+echo "Working on the docker-compose.yml ..."
+cat <<EOD > ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/docker-compose.yml
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=\${DBNAME}
+      - POSTGRES_USER=\${PGUSER}
+      - POSTGRES_PASSWORD=\${PGPWD}
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+EOD
+
+echo "Adding Secret variables to .env ..."
+cat <<EOD > ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/.env
+SECRET_KEY=
+DEBUG=True
+DBNAME=
+PGUSER=
+PGPWD=
+PGHOST=
+PGPORT=
+EOD
+
+echo "Keeping secrets Secret..."
+echo ".env" >> ~/MyApps/apps/Tools/$PROJECT_NAME_CAMEL/.gitignore
+
+EOF
+
+# Make the generated script executable
+chmod +x $GENERATED_SCRIPT
+
+# Execute the generated script
+$GENERATED_SCRIPT
+
+# Delete the generated script after execution
+rm $GENERATED_SCRIPT

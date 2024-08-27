@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Set the directory to search in; use the current directory by default
+SEARCH_DIR=${1:-.}
+
+# Find and list executable files in the specified directory
+find "$SEARCH_DIR" -type f -perm +111 -exec basename {} \;
