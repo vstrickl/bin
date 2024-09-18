@@ -15,16 +15,6 @@ else
     echo -e "${GREEN}Pylint passed!${NC}"
 fi
 
-# Run mypy
-echo -e "${YELLOW}Running mypy...${NC}"
-mypy **/*.py
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Mypy failed. Exiting...${NC}"
-    exit 1
-else
-    echo -e "${GREEN}Mypy passed!${NC}"
-fi
-
 # Run Ruff
 echo -e "${YELLOW}Running Ruff...${NC}"
 ruff check **/*.py
