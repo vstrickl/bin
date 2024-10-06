@@ -3,9 +3,27 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
-# Set Environmental Variables
-bash ~/bin/sdlc/set_envars
+# Stop any running containers using port 8000 (optional)
+echo -e " "
+echo -e "${YELLOW}Stopping containers using Port 8000...${NC}"
+echo -e " "
 
+# Capture the output of the docker stop command
+stopped_containers=$(docker ps -q --filter "ancestor=web")
+
+if [ -n "$stopped_containers" ]; then
+    docker stop $stopped_containers
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to stop running containers using port 8000. Exiting...${NC}"
+        exit 1
+    else
+        echo -e "${GREEN}Successfully stopped containers using port 8000.${NC}"
+    fi
+else
+    echo -e "${GREEN}No containers found using port 8000. Skipping stop step.${NC}"
+fi
+
+# Start Process
 echo -e " "
 echo -e "${YELLOW}Building project...${NC}"
 echo -e " "
@@ -24,7 +42,7 @@ fi
 
 # Run Docker image Locally
 echo -e "${YELLOW}Running Docker image Locally...${NC}"
-docker compose up web --remove-orphans 
+docker compose up local_web --remove-orphans 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Creating Docker container failed. Exiting...${NC}"
     echo -e " "
