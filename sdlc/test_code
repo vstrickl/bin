@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Set Colors and handle errors
+source ~/bin/colors
+
+# Build Docker image
+~/bin/sdlc/build
+
+# Check if check_code executable exists and is executable
+if [ ! -x "${PWD}/sdlc/check_code" ]; then
+  echo -e "${RED}Error: check_code executable not found or not executable in ${PWD}/sdlc.${NC}"
+  exit 1
+fi
+
+# Run check_code
+docker compose run check_code
+
+# Check if check_code ran successfully
+if [ $? -ne 0 ]; then
+  echo -e "${RED}Error: check_code failed.${NC}"
+  exit 1
+fi
+
+echo -e " "
+echo -e "${GREEN}CICD Test successfully complete!${NC}"
+echo -e " "

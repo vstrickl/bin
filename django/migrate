@@ -6,8 +6,13 @@ source ~/bin/colors
 # Make migrations
 echo -e "${YELLOW}Making migrations...${NC}"
 migration_output=$(python app/manage.py makemigrations 2>&1)
+
+# Check if the command was successful
 if [ $? -ne 0 ]; then
+    echo -e "${RED}Migrations failed:${NC}\n$migration_output"
     handle_error "Migrations failed. Exiting..."
+else
+    echo -e "${GREEN}Migrations completed successfully.${NC}"
 fi
 
 # Migrate changes as needed

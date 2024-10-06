@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Set Colors and handle errors
+source ~/bin/colors
+
+# Update dependencies
+bash ~/bin/django/update_dependencies
+if [ $? -ne 0 ]; then
+    handle_error "Install Dependencies script failed. Exiting deployment..."
+fi
+
+# Check if static/ folder exists within the app directory
+if [ -d "app/static/" ]; then
+    # Collect static files, compile assets, etc.
+    bash ~/bin/collect_static
+    if [ $? -ne 0 ]; then
+        handle_error "Collect Static files failed. Exiting deployment..."
+    fi
+else
+    echo "No static/ folder found in the app directory. Skipping static file collection..."
+    echo -e " "
+fi
+
+# Make migrations
+bash ~/bin/django/migrate
+if [ $? -ne 0 ]; then
+    handle_error "Migration script failed. Exiting deployment..."
+fi

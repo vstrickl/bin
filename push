@@ -15,7 +15,7 @@ fi
 BRANCH_NAME=$1
 
 # Reset pip requirements.txt file
-sdlc/reset_requirements
+reset_requirements
 
 # Check the status of the repository
 echo -e " "

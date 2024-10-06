@@ -10,42 +10,39 @@ echo -e " "
 echo -e "${YELLOW}Building project...${NC}"
 echo -e " "
 
-# Install dependencies
-bash ~/bin/sdlc/install_dependencies
+# Update Django Environment
+bash ~/bin/django/update_env
 if [ $? -ne 0 ]; then
-    handle_error "Install Dependencies script failed. Exiting deployment..."
-fi
-
-# Reset pip requirements.txt file
-bash ~/bin/sdlc/reset_requirements
-
-# Collect static files, compile assets, etc...
-bash ~/bin/sdlc/collect_static
-if [ $? -ne 0 ]; then
-    handle_error "Collect Static files failed. Exiting deployment..."
-fi
-
-# Make migrations
-bash ~/bin/sdlc/migrate
-if [ $? -ne 0 ]; then
-    handle_error "Migration script failed. Exiting deployment..."
+    handle_error "Django Environment Update failed. Exiting..."
 fi
 
 # Build Docker image
 bash ~/bin/sdlc/build
 if [ $? -ne 0 ]; then
-    handle_error "Build script failed. Exiting deployment..."
+    handle_error "Build script failed. Exiting..."
 fi
 
-# Push Docker image to Docker Hub
-echo -e "${YELLOW}Pushing Docker image to Docker Hub...${NC}"
-docker push ${DOCKER_USERNAME}/${DOCKER_REPO_NAME}:latest
+# Push Docker images to Docker Hub
+echo -e "${YELLOW}Pushing Docker images to Docker Hub...${NC}"
+
+# Push Database Image
+echo -e "${YELLOW}Pushing Database image...${NC}"
+docker compose push db
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Docker image push failed. Exiting...${NC}"
+    echo -e "${RED}Docker database image failed to push. Exiting...${NC}"
     echo -e " "
     exit 1
 fi
 
-echo -e "${GREEN}Docker image successfully pushed to Docker Hub!${NC}"
+# Push Web Image
+echo -e "${YELLOW}Pushing Database image...${NC}"
+docker compose push web
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Docker database image failed to push. Exiting...${NC}"
+    echo -e " "
+    exit 1
+fi
+
+echo -e "${GREEN}Docker images successfully pushed to Docker Hub!${NC}"
 echo -e "${GREEN}Deployment script completed successfully!${NC}"
 echo -e " "
