@@ -3,8 +3,20 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
-# Build Docker image
-~/bin/sdlc/build
+# Start Docker Build process
+bash ~/bin/sdlc/build
+if [ $? -ne 0 ]; then
+    handle_error "Build script failed. Exiting..."
+fi
+
+# Build CI/CD Image
+echo -e "${YELLOW}Building CI/CD image...${NC}"
+docker compose build check_code
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Docker CI/CD image build failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
+fi
 
 # Check if check_code executable exists and is executable
 if [ ! -x "${PWD}/sdlc/check_code" ]; then

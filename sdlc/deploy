@@ -34,10 +34,20 @@ if [ $? -ne 0 ]; then
     handle_error "Django Environment Update failed. Exiting..."
 fi
 
-# Build Docker image
+# Start Docker Build process
+echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
 bash ~/bin/sdlc/build
 if [ $? -ne 0 ]; then
     handle_error "Build script failed. Exiting..."
+fi
+
+# Build Web Image
+echo -e "${YELLOW}Building Web image...${NC}"
+docker compose build web
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Docker web image build failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
 fi
 
 # Push Docker images to Docker Hub

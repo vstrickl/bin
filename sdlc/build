@@ -4,6 +4,7 @@
 source ~/bin/colors
 
 # Check if the script is running on GitHub Actions
+echo -e "${YELLOW}Checking Environment...${NC}"
 if [ -n "$GITHUB_ACTIONS" ]; then
     echo -e "${YELLOW}Running on GitHub Actions, using GitHub environment variables...${NC}"
 else
@@ -18,6 +19,7 @@ else
 fi
 
 # Checking envars
+echo -e "${YELLOW}Looking for Envars...${NC}"
 if [ -z "$DOCKER_USERNAME" ]; then
     handle_error "Error: DOCKER_USERNAME is not set. Please ensure it's defined in your .env file or as an environment variable."
 fi
@@ -37,10 +39,8 @@ fi
 echo -e "${GREEN}Docker login successful!${NC}"
 echo -e " "
 
-# Build Docker image
-echo -e "${YELLOW}Building Docker images...${NC}"
-
 # Optionally skip building the DB image if using the default postgres image
+echo -e "${YELLOW}Checking if need to building Database image...${NC}"
 if docker compose config | grep -q "build: "; then
     echo -e "${YELLOW}Building Database image...${NC}"
     docker compose build db
@@ -52,25 +52,3 @@ if docker compose config | grep -q "build: "; then
 else
     echo -e "${YELLOW}Database image does not require building (using standard postgres:13 image).${NC}"
 fi
-
-# Build Web Image
-echo -e "${YELLOW}Building Web image...${NC}"
-docker compose build web
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Docker web image build failed. Exiting...${NC}"
-    echo -e " "
-    exit 1
-fi
-
-# Build CI/CD Image
-echo -e "${YELLOW}Building CI/CD image...${NC}"
-docker compose build check_code
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Docker CI/CD image build failed. Exiting...${NC}"
-    echo -e " "
-    exit 1
-fi
-
-echo -e " "
-echo -e "${GREEN}Successfully built Docker images!${NC}"
-echo -e " "
