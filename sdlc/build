@@ -51,4 +51,5 @@ if docker compose config | grep -q "build: "; then
     fi
 else
     echo -e "${YELLOW}Database image does not require building (using standard postgres:13 image).${NC}"
+    echo -e " "
 fi
