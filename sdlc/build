@@ -3,14 +3,21 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
-# Load environment variables from the project-specific .env file
-if [ -f "${PWD}/.env" ]; then
-    export $(grep -v '^#' "${PWD}/.env" | xargs)
+# Check if the script is running on GitHub Actions
+if [ -n "$GITHUB_ACTIONS" ]; then
+    echo -e "${YELLOW}Running on GitHub Actions, using GitHub environment variables...${NC}"
 else
-    echo -e "${RED}Error: .env file not found in the current project directory (${PWD}). Exiting...${NC}"
-    exit 1
+    # Load environment variables from the project-specific .env file if it exists
+    if [ -f "${PWD}/.env" ]; then
+        echo -e "${YELLOW}Loading environment variables from .env file...${NC}"
+        export $(grep -v '^#' "${PWD}/.env" | xargs)
+    else
+        echo -e "${RED}Error: .env file not found in the current project directory (${PWD}). Exiting...${NC}"
+        exit 1
+    fi
 fi
 
+# Checking envars
 if [ -z "$DOCKER_USERNAME" ]; then
     handle_error "Error: DOCKER_USERNAME is not set. Please ensure it's defined in your .env file or as an environment variable."
 fi
