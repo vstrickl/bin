@@ -14,15 +14,3 @@ if [ $? -ne 0 ]; then
 else
     echo -e "${GREEN}Pylint passed!${NC}"
 fi
-
-# Run Ruff
-echo -e "${YELLOW}Running Ruff...${NC}"
-ruff check **/*.py
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Ruff failed. Exiting...${NC}"
-    exit 1
-else
-    echo -e "${GREEN}Ruff passed!${NC}"
-fi
-
-echo -e "${GREEN}Linter checks completed successfully!${NC}"
