@@ -3,9 +3,6 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
-# Load & Set Environmental Variables
-bash ~/bin/sdlc/set_envars
-
 echo -e " "
 echo -e "${YELLOW}Building project...${NC}"
 echo -e " "
