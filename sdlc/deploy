@@ -39,9 +39,19 @@ fi
 
 # Start Docker Build process
 echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
-bash ~/bin/sdlc/build
+bash ~/bin/sdlc/auth
 if [ $? -ne 0 ]; then
     handle_error "Build script failed. Exiting..."
+fi
+
+# Building the DB image
+echo -e "${YELLOW}Checking if need to building Database image...${NC}"
+echo -e "${YELLOW}Building Database image...${NC}"
+docker compose build db
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Docker database image build failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
 fi
 
 # Build Web Image

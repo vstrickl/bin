@@ -3,11 +3,21 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
+# Define the path to manage.py relative to the current working directory
+MANAGE_PY_PATH="${PWD}/app/manage.py"
+
+# Check if manage.py exists in the current working directory
+if [ ! -f "$MANAGE_PY_PATH" ]; then
+    echo -e "${RED}Error: manage.py not found at $MANAGE_PY_PATH${NC}"
+    exit 1
+fi
+
 # Make migrations
 echo -e "${YELLOW}Making migrations...${NC}"
-migration_output=$(python app/manage.py makemigrations 2>&1)
+echo ""
+migration_output=$(python "$MANAGE_PY_PATH" makemigrations 2>&1)
 
-# Check if the command was successful
+# Check if the makemigrations command was successful
 if [ $? -ne 0 ]; then
     echo -e "${RED}Migrations failed:${NC}\n$migration_output"
     handle_error "Migrations failed. Exiting..."
@@ -15,18 +25,22 @@ else
     echo -e "${GREEN}Migrations completed successfully.${NC}"
 fi
 
-# Migrate changes as needed
-if echo "$migration_output" | grep -q "No changes detected"; then
-    echo -e "${YELLOW}No changes detected in migrations.${NC}"
-    echo -e " "
-else
-    # Apply migrations
-    echo -e "${YELLOW}Applying migrations...${NC}"
-    python app/manage.py migrate
+# Check if migrations are needed using showmigrations
+echo -e "${YELLOW}Checking for unapplied migrations...${NC}"
+unapplied_migrations=$(python "$MANAGE_PY_PATH" showmigrations --plan | grep '\[ \]')
+
+# Apply migrations if unapplied migrations exist
+if [ -n "$unapplied_migrations" ]; then
+    echo -e "${YELLOW}Applying unapplied migrations...${NC}"
+    python "$MANAGE_PY_PATH" migrate
     if [ $? -ne 0 ]; then
         handle_error "Migration application failed. Exiting..."
     else
         echo -e "${GREEN}Migrations applied successfully!${NC}"
-        echo -e " "
     fi
+else
+    echo -e "${GREEN}No unapplied migrations found. Skipping migration step.${NC}"
 fi
+
+# Show migration status
+python "$MANAGE_PY_PATH" showmigrations

@@ -35,7 +35,7 @@ fi
 
 # Build Local Web Image
 echo -e "${YELLOW}Building Local Web image...${NC}"
-docker compose build local_web
+docker compose build web
 if [ $? -ne 0 ]; then
     echo -e "${RED}Docker local_web image build failed. Exiting...${NC}"
     echo -e " "

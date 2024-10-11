@@ -38,18 +38,3 @@ fi
 
 echo -e "${GREEN}Docker login successful!${NC}"
 echo -e " "
-
-# Optionally skip building the DB image if using the default postgres image
-echo -e "${YELLOW}Checking if need to building Database image...${NC}"
-if docker compose config | grep -q "build: "; then
-    echo -e "${YELLOW}Building Database image...${NC}"
-    docker compose build db
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Docker database image build failed. Exiting...${NC}"
-        echo -e " "
-        exit 1
-    fi
-else
-    echo -e "${YELLOW}Database image does not require building (using standard postgres:13 image).${NC}"
-    echo -e " "
-fi

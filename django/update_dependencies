@@ -3,36 +3,47 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
-# Checking if Dependencies are satisfied
-echo -e "${YELLOW}Checking if dependencies are satisfied...${NC}"
-pip freeze > installed_packages.txt
+# Checking if Dependencies are satisfied based on installed packages
+echo -e "${YELLOW}Checking installed packages...${NC}"
+echo -e " "
+
+# Generate installed packages list using pipdeptree to get only top-level packages
+pipdeptree -f -d 0 > installed_packages.txt
+
+
+# Check if requirements.txt exists in the app/ directory
+if [ ! -f "${PWD}/app/requirements.txt" ]; then
+    echo -e "${RED}${PWD}/app/requirements.txt does not exist. Creating it from installed packages...${NC}"
+    echo -e " "
+    touch "${PWD}/app/requirements.txt"
+fi
+
+# Compare requirements.txt with installed_packages.txt
 if ! diff -q <(sort "${PWD}/app/requirements.txt") <(sort installed_packages.txt) > /dev/null 2>&1; then
-    echo -e "${YELLOW}Requirements not satisfied. Installing dependencies...${NC}"
-    pip install -r "${PWD}/app/requirements.txt"
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Failed to install dependencies. Exiting...${NC}"
-        echo -e " "
-        exit 1
-    else
-        echo -e "${GREEN}Successfully installed dependencies!${NC}"
-        echo -e " "
-    fi
+    echo -e "${YELLOW}requirements.txt is out of sync with installed packages. Updating it...${NC}"
+    echo -e " "
+    # Overwrite requirements.txt with the top-level installed packages
+    cp installed_packages.txt "${PWD}/app/requirements.txt"
+    echo -e "${GREEN}Successfully updated ${PWD}/app/requirements.txt from installed packages.${NC}"
+    echo -e " "
 else
-    echo -e "${GREEN}All requirements are already satisfied. Skipping pip install...${NC}"
+    echo -e "${GREEN}requirements.txt is already up-to-date. No changes needed.${NC}"
     echo -e " "
 fi
+
+# Clean up temporary installed_packages.txt file
 rm installed_packages.txt
 
-# Resetting requirements.txt file
-echo -e "${YELLOW}Resetting ${PWD}/app/requirements.txt...${NC}"
-rm "${PWD}/app/requirements.txt"
-
-# Updating requirements.txt with the latest installed packages (simple list)
-echo -e "${YELLOW}Updating ${PROJECT_DIR}/app/requirements.txt...${NC}"
-pip freeze | grep -E '^[a-zA-Z0-9\-]+' | awk -F '==' '{print $1}' > "${PWD}/app/requirements.txt"
-
-# Display the updated requirements.txt
-cat "${PWD}/app/requirements.txt"
-
-echo -e "${GREEN}Successfully updated ${PWD}/app/requirements.txt!${NC}"
-echo -e " "
+# Install Dependencies
+echo -e "${YELLOW}Installing dependencies...${NC}"
+pip install -r "${PWD}/app/requirements.txt"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to install dependencies. Exiting...${NC}"
+    echo -e " "
+    exit 1
+else
+    echo -e "${GREEN}Successfully installed dependencies for deployment.${NC}"
+    echo -e " "
+    cat "${PWD}/app/requirements.txt" 
+    echo -e " "
+fi

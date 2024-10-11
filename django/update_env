@@ -3,12 +3,6 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
-# Update dependencies
-bash ~/bin/django/update_dependencies
-if [ $? -ne 0 ]; then
-    handle_error "Install Dependencies script failed. Exiting deployment..."
-fi
-
 # Check if static/ folder exists within the app directory
 if [ -d "app/static/" ]; then
     # Collect static files, compile assets, etc.
