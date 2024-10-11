@@ -31,12 +31,6 @@ echo -e " "
 echo -e "${YELLOW}Building project...${NC}"
 echo -e " "
 
-# Update Django Environment
-bash ~/bin/django/update_env
-if [ $? -ne 0 ]; then
-    handle_error "Django Environment Update failed. Exiting..."
-fi
-
 # Start Docker Build process
 echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
 bash ~/bin/sdlc/auth
