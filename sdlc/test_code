@@ -5,7 +5,7 @@ source ~/bin/colors
 
 # Start Docker Build process
 echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
-bash ~/bin/sdlc/build
+bash ~/bin/sdlc/auth
 if [ $? -ne 0 ]; then
     handle_error "Build script failed. Exiting..."
 fi
