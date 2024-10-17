@@ -3,6 +3,23 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
+# Define cleanup function
+cleanup() {
+    echo -e " "
+    echo -e "${YELLOW}Cleaning up and stopping Docker containers...${NC}"
+    docker compose down
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to stop Docker containers. Please check manually.${NC}"
+        echo -e " "
+    else
+        echo -e "${GREEN}Docker containers stopped successfully.${NC}"
+        echo -e " "
+    fi
+}
+
+# Trap EXIT signal to run cleanup
+trap cleanup EXIT
+
 # Stop any running containers using port 8000 (optional)
 echo -e " "
 echo -e "${YELLOW}Stopping containers using Port 8000...${NC}"
