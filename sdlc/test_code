@@ -67,5 +67,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo -e " "
-echo -e "${GREEN}Code Check Test successfully complete!${NC}"
+echo -e "${GREEN}Check Code Test successfully complete!${NC}"
 echo -e " "
