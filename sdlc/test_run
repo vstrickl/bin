@@ -83,7 +83,7 @@ fi
 
 # Run Docker image Locally
 echo -e "${YELLOW}Running Docker image Locally...${NC}"
-docker compose up web
+docker compose up -d web
 if [ $? -ne 0 ]; then
     echo -e "${RED}Creating Docker container failed. Exiting...${NC}"
     echo -e " "
