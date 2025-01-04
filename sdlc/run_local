@@ -54,23 +54,17 @@ else
     echo -e " "
 fi
 
+# Get Authorization
+echo -e "${YELLOW}Authenticating with Docker...${NC}"
+bash ~/bin/sdlc/auth
+if [ $? -ne 0 ]; then
+    handle_error "Authorization failed. Exiting..."
+fi
+
 # Start Process
 echo -e " "
 echo -e "${YELLOW}Building project...${NC}"
 echo -e " "
-
-# Update Django Environment
-bash ~/bin/django/update_env
-if [ $? -ne 0 ]; then
-    handle_error "Django Environment Update failed. Exiting..."
-fi
-
-# Start Docker Build process
-echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
-bash ~/bin/sdlc/auth
-if [ $? -ne 0 ]; then
-    handle_error "Build script failed. Exiting..."
-fi
 
 # Build Local Web Image
 echo -e "${YELLOW}Building Local Web image...${NC}"
@@ -83,7 +77,7 @@ fi
 
 # Run Docker image Locally
 echo -e "${YELLOW}Running Docker image Locally...${NC}"
-docker compose up -d web
+docker compose up web
 if [ $? -ne 0 ]; then
     echo -e "${RED}Creating Docker container failed. Exiting...${NC}"
     echo -e " "

@@ -31,13 +31,6 @@ cleanup() {
 # Trap EXIT signal to run cleanup
 trap cleanup EXIT
 
-# Start Docker Build process
-echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
-bash ~/bin/sdlc/auth
-if [ $? -ne 0 ]; then
-    handle_error "Build script failed. Exiting..."
-fi
-
 # Stop any running containers using port 8000 (optional)
 echo -e " "
 echo -e "${YELLOW}Stopping containers using Port 8000...${NC}"
@@ -61,11 +54,23 @@ else
     echo -e " "
 fi
 
+# Get Authorization
+echo -e "${YELLOW}Authenticating with Docker...${NC}"
+bash ~/bin/sdlc/auth
+if [ $? -ne 0 ]; then
+    handle_error "Authorization failed. Exiting..."
+fi
+
+# Start Process
+echo -e " "
+echo -e "${YELLOW}Building project...${NC}"
+echo -e " "
+
 # Build Local Web Image
 echo -e "${YELLOW}Building Local Web image...${NC}"
 docker compose build web
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Docker local_web image build failed. Exiting...${NC}"
+    echo -e "${RED}Docker web image build failed. Exiting...${NC}"
     echo -e " "
     exit 1
 fi
@@ -78,6 +83,10 @@ if [ $? -ne 0 ]; then
     echo -e " "
     exit 1
 fi
+
+echo -e " "
+echo -e "${YELLOW}Checking if executable file exists...${NC}"
+echo -e " "
 
 # Check if check_code executable exists and is executable
 if [ ! -x "${PWD}/sdlc/check_code" ]; then
