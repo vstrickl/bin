@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# Set Colors and handle errors
+source ~/bin/colors
+
+# Load environment variables
+if [ ! -f .env ]; then
+    echo -e "${RED}.env file not found. Exiting...${NC}"
+    exit 1
+fi
+export $(grep -v '^#' .env | xargs)
+
+# Check if APP_NAME is set in .env
+if [ -z "$APP_NAME" ]; then
+    echo -e "${RED}APP_NAME is not defined in the .env file. Exiting...${NC}"
+    exit 1
+fi
+
+# Stop any running containers using port 8000 (optional)
+echo -e " "
+echo -e "${YELLOW}Stopping containers using Port 8000...${NC}"
+echo -e " "
+
+# Capture the output of the docker stop command
+stopped_containers=$(docker ps -q --filter "ancestor=web")
+
+if [ -n "$stopped_containers" ]; then
+    docker stop $stopped_containers
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to stop running containers using port 8000. Exiting...${NC}"
+        echo -e " "
+        exit 1
+    else
+        echo -e "${GREEN}Successfully stopped containers using port 8000.${NC}"
+        echo -e " "
+    fi
+else
+    echo -e "${GREEN}No containers found using port 8000. Skipping stop step.${NC}"
+    echo -e " "
+fi
+
+# Start process
+echo -e " "
+echo -e "${YELLOW}Building project...${NC}"
+echo -e " "
+
+# Start Docker Build process
+echo -e "${YELLOW}Starting Docker Build Prcess...${NC}"
+bash ~/bin/sdlc/auth
+if [ $? -ne 0 ]; then
+    handle_error "Build script failed. Exiting..."
+fi
+
+# Define repository and tag variables
+DOCKER_REPO="${DOCKER_USERNAME}/${APP_NAME}"
+IMAGE_TAG="latest"
+
+# Build Web Image
+echo -e "${YELLOW}Building project web service image...${NC}"
+docker compose build web
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Docker project web service image build failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
+fi
+
+# Verify Web Image Exists
+echo -e "${YELLOW}Verifying project web service image exists...${NC}"
+image_check=$(docker images | grep -w "${APP_NAME}")
+if [ -z "$image_check" ]; then
+    echo -e "${RED}No Docker image found for '${APP_NAME}'. Build may have failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
+else
+    echo -e "${GREEN}Docker image built successfully and exists locally.${NC}"
+    echo -e " "
+fi
+
+# Tag the image
+echo -e "${YELLOW}Tagging project web service image...${NC}"
+docker tag ${APP_NAME}:latest $DOCKER_REPO:$IMAGE_TAG
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to tag the image. Exiting...${NC}"
+    echo -e " "
+    exit 1
+else
+    echo -e "${GREEN}Project image tagged as $DOCKER_REPO:$IMAGE_TAG.${NC}"
+    echo -e " "
+fi
+
+echo -e "${GREEN}Deployment script completed successfully!${NC}"
+echo -e " "
