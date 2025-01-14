@@ -56,52 +56,40 @@ DOCKER_REPO="${DOCKER_USERNAME}/${APP_NAME}"
 IMAGE_TAG="latest"
 
 # Build Web Image
-echo -e "${YELLOW}Building Web image...${NC}"
+echo -e "${YELLOW}Building project web service image...${NC}"
 docker compose build web
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Docker web image build failed. Exiting...${NC}"
+    echo -e "${RED}Docker project web service image build failed. Exiting...${NC}"
     echo -e " "
     exit 1
-fi
-
-# Verify Web Image Exists
-echo -e "${YELLOW}Verifying Web image exists...${NC}"
-image_check=$(docker images | grep -w "web")
-if [ -z "$image_check" ]; then
-    echo -e "${RED}No Docker image found for 'web'. Build may have failed. Exiting...${NC}"
-    echo -e " "
-    exit 1
-else
-    echo -e "${GREEN}Docker Web image built successfully and exists locally.${NC}"
-    echo -e " "
 fi
 
 # Tag the image
-echo -e "${YELLOW}Tagging Web image...${NC}"
+echo -e "${YELLOW}Tagging project web service image...${NC}"
 docker tag web:latest $DOCKER_REPO:$IMAGE_TAG
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to tag the Web image. Exiting...${NC}"
+    echo -e "${RED}Failed to tag the image. Exiting...${NC}"
     echo -e " "
     exit 1
 else
-    echo -e "${GREEN}Web image tagged as $DOCKER_REPO:$IMAGE_TAG.${NC}"
+    echo -e "${GREEN}Project image tagged as $DOCKER_REPO:$IMAGE_TAG.${NC}"
     echo -e " "
 fi
 
 # Push Docker images to Docker Hub
-echo -e "${YELLOW}Pushing Docker images to Docker Hub...${NC}"
+echo -e "${YELLOW}Pushing Docker image to Docker Hub...${NC}"
 push_output=$(docker push $DOCKER_REPO:$IMAGE_TAG 2>&1)
 
 # Check if 'skipped' appears in the output
 if echo "$push_output" | grep -q "skipped"; then
-    echo -e "${RED}Docker push for web was skipped. Exiting...${NC}"
+    echo -e "${RED}Docker project image push was skipped. Exiting...${NC}"
     echo -e " "
     echo -e "${RED}Reason for skipping:${NC}"
     echo "$push_output" | grep -i "skipped"
     echo -e " "
     exit 1
 elif [ $? -ne 0 ]; then
-    echo -e "${RED}Docker push for web failed. Exiting...${NC}"
+    echo -e "${RED}Docker project image push failed. Exiting...${NC}"
     echo -e " "
     echo -e "${RED}Error details:${NC}"
     echo "$push_output"
