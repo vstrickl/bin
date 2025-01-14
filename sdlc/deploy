@@ -3,6 +3,19 @@
 # Set Colors and handle errors
 source ~/bin/colors
 
+# Load environment variables
+if [ ! -f .env ]; then
+    echo -e "${RED}.env file not found. Exiting...${NC}"
+    exit 1
+fi
+export $(grep -v '^#' .env | xargs)
+
+# Check if APP_NAME is set in .env
+if [ -z "$APP_NAME" ]; then
+    echo -e "${RED}APP_NAME is not defined in the .env file. Exiting...${NC}"
+    exit 1
+fi
+
 # Stop any running containers using port 8000 (optional)
 echo -e " "
 echo -e "${YELLOW}Stopping containers using Port 8000...${NC}"
@@ -39,7 +52,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Define repository and tag variables
-DOCKER_REPO="${DOCKER_USERNAME}/web"
+DOCKER_REPO="${DOCKER_USERNAME}/${APP_NAME}"
 IMAGE_TAG="latest"
 
 # Build Web Image
