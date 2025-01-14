@@ -47,6 +47,18 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Verify Web Image Exists
+echo -e "${YELLOW}Verifying Web image exists...${NC}"
+image_check=$(docker images | grep -w "web")
+if [ -z "$image_check" ]; then
+    echo -e "${RED}No Docker image found for 'web'. Build may have failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
+else
+    echo -e "${GREEN}Docker Web image built successfully and exists locally.${NC}"
+    echo -e " "
+fi
+
 # Push Docker images to Docker Hub
 echo -e "${YELLOW}Pushing Docker images to Docker Hub...${NC}"
 
