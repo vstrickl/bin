@@ -90,26 +90,11 @@ fi
 
 # Push Docker images to Docker Hub
 echo -e "${YELLOW}Pushing Docker image to Docker Hub...${NC}"
-push_output=$(docker push $DOCKER_REPO:$IMAGE_TAG 2>&1)
-
-# Check if 'skipped' appears in the output
-if echo "$push_output" | grep -q "skipped"; then
-    echo -e "${RED}Docker project image push was skipped. Exiting...${NC}"
-    echo -e " "
-    echo -e "${RED}Reason for skipping:${NC}"
-    echo "$push_output" | grep -i "skipped"
-    echo -e " "
-    exit 1
-elif [ $? -ne 0 ]; then
-    echo -e "${RED}Docker project image push failed. Exiting...${NC}"
-    echo -e " "
-    echo -e "${RED}Error details:${NC}"
-    echo "$push_output"
-    echo -e " "
-    exit 1
+if docker push $DOCKER_REPO:$IMAGE_TAG; then
+    echo -e "${GREEN}Docker image successfully pushed to Docker Hub!${NC}"
 else
-    echo -e "${GREEN}Docker web image successfully pushed to Docker Hub!${NC}"
-    echo -e " "
+    echo -e "${RED}Docker image push failed. Exiting...${NC}"
+    exit 1
 fi
 
 echo -e "${GREEN}Deployment script completed successfully!${NC}"
