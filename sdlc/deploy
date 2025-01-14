@@ -52,11 +52,26 @@ echo -e "${YELLOW}Pushing Docker images to Docker Hub...${NC}"
 
 # Push Web Image
 echo -e "${YELLOW}Pushing Database image...${NC}"
-docker compose push web
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Docker database image failed to push. Exiting...${NC}"
+push_output=$(docker compose push web 2>&1)
+
+# Check if 'skipped' appears in the output
+if echo "$push_output" | grep -q "skipped"; then
+    echo -e "${RED}Docker push for web was skipped. Exiting...${NC}"
+    echo -e " "
+    echo -e "${RED}Reason for skipping:${NC}"
+    echo "$push_output" | grep -i "skipped"
     echo -e " "
     exit 1
+elif [ $? -ne 0 ]; then
+    echo -e "${RED}Docker push for web failed. Exiting...${NC}"
+    echo -e " "
+    echo -e "${RED}Error details:${NC}"
+    echo "$push_output"
+    echo -e " "
+    exit 1
+else
+    echo -e "${GREEN}Docker web image successfully pushed to Docker Hub!${NC}"
+    echo -e " "
 fi
 
 echo -e "${GREEN}Docker images successfully pushed to Docker Hub!${NC}"
