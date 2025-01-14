@@ -64,9 +64,21 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Verify Web Image Exists
+echo -e "${YELLOW}Verifying project web service image exists...${NC}"
+image_check=$(docker images | grep -w "${APP_NAME}")
+if [ -z "$image_check" ]; then
+    echo -e "${RED}No Docker image found for '${APP_NAME}'. Build may have failed. Exiting...${NC}"
+    echo -e " "
+    exit 1
+else
+    echo -e "${GREEN}Docker image built successfully and exists locally.${NC}"
+    echo -e " "
+fi
+
 # Tag the image
 echo -e "${YELLOW}Tagging project web service image...${NC}"
-docker tag web:latest $DOCKER_REPO:$IMAGE_TAG
+docker tag ${APP_NAME}:latest $DOCKER_REPO:$IMAGE_TAG
 if [ $? -ne 0 ]; then
     echo -e "${RED}Failed to tag the image. Exiting...${NC}"
     echo -e " "
